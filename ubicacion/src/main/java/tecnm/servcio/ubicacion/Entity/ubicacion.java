@@ -13,7 +13,7 @@ import lombok.*;
 public class ubicacion {
 
 	
-
+//Hol
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
