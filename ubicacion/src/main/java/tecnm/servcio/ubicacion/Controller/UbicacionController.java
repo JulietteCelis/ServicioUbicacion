@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import tecnm.servcio.ubicacion.Dto.UbicacionRequestDTO;
@@ -22,10 +23,9 @@ import tecnm.servcio.ubicacion.Service.UbicacionService;
 @RestController
 @RequestMapping("/api/ubicaciones")
 @RequiredArgsConstructor
-
 public class UbicacionController {
-	
-	private final UbicacionService ubicacionService;
+
+    private final UbicacionService ubicacionService;
 
     @PostMapping
     public ResponseEntity<UbicacionResponseDTO> crear(@Valid @RequestBody UbicacionRequestDTO dto) {
@@ -38,13 +38,12 @@ public class UbicacionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UbicacionResponseDTO>> obtenerTodas() {
+    public ResponseEntity<List<UbicacionResponseDTO>> listarTodas() {
         return ResponseEntity.ok(ubicacionService.obtenerTodas());
     }
 
-    @GetMapping("/buscar")
-    public ResponseEntity<List<UbicacionResponseDTO>> buscarPorColonia(
-            @RequestParam String colonia) {
+    @GetMapping("/filtro")
+    public ResponseEntity<List<UbicacionResponseDTO>> buscar(@RequestParam String colonia) {
         return ResponseEntity.ok(ubicacionService.buscarPorColonia(colonia));
     }
 
@@ -60,5 +59,4 @@ public class UbicacionController {
         ubicacionService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-
 }
