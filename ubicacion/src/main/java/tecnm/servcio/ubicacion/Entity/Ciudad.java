@@ -13,15 +13,16 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "ciudades")
-@Data 
+@Data
 @NoArgsConstructor
-@AllArgsConstructor 
+@AllArgsConstructor
 @Builder
 public class Ciudad {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "nombre")
     private String nombre;
 }

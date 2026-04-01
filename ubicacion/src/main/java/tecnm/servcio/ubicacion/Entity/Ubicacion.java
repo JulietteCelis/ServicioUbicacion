@@ -29,6 +29,6 @@ public class Ubicacion {
     private String direccion;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "colonia_id", nullable = false)
+    @JoinColumn(name = "colonia_id")
     private Colonia colonia;
 }

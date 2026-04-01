@@ -1,6 +1,5 @@
 package tecnm.servcio.ubicacion.Entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,10 +26,10 @@ public class Colonia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "nombre")
     private String nombre;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ciudad_id", nullable = false)
+    @JoinColumn(name = "ciudad_id")
     private Ciudad ciudad;
 }
