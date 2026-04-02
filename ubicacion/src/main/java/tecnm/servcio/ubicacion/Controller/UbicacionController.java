@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import tecnm.servcio.ubicacion.Dto.UbicacionRequestDTO;
 import tecnm.servcio.ubicacion.Dto.UbicacionResponseDTO;
 import tecnm.servcio.ubicacion.Service.UbicacionService;
+
+@CrossOrigin(origins = "http://localhost:3002") 
 
 @RestController
 @RequestMapping("/api/ubicaciones")
