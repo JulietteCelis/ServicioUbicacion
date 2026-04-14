@@ -13,6 +13,6 @@ public class UbicacionResponseDTO {
     private Double latitud;
     private Double longitud;
     private String direccion;
-    private String colonia;
+    private String colonia; 
     private String ciudad;
 }
