@@ -62,4 +62,9 @@ public class UbicacionController {
         ubicacionService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/usuario/{id}")
+    public ResponseEntity<String> probarusuario(@PathVariable Long id) {
+        return ResponseEntity.ok(ubicacionService.pruebaUsuario(id));
+    }
 }

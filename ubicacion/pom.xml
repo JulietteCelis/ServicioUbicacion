@@ -86,7 +86,31 @@
             <artifactId>Proyecto1</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        
+        <dependency>
+			<groupId>com.ayuntamiento</groupId>
+			<artifactId>security-lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.auth</groupId>
+			<artifactId>client-sdk</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
     </dependencies>
+    
+    <repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/ChrisBlanquet/security-lib</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 
     <build>
         <plugins>

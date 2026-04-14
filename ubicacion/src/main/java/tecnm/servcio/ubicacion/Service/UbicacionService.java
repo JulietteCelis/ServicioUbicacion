@@ -18,5 +18,7 @@ public interface UbicacionService {
     UbicacionResponseDTO actualizar(Long id, UbicacionRequestDTO dto);
 
     void eliminar(Long id);
+    
+    String pruebaUsuario(Long id);
 
 }

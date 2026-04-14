@@ -1,9 +1,15 @@
 package tecnm.servcio.ubicacion.ServiceImpl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.auth.client_sdk.dto.UsuarioAuthDto;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import tecnm.servcio.ubicacion.Dto.UbicacionRequestDTO;
 import tecnm.servcio.ubicacion.Dto.UbicacionResponseDTO;
 import tecnm.servcio.ubicacion.Entity.Ciudad;
@@ -16,8 +22,9 @@ import tecnm.servcio.ubicacion.Repository.UbicacionRepository;
 import tecnm.servcio.ubicacion.Service.UbicacionService;
 import tecnm.servcio.ubicacion.mapper.UbicacionMapper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.auth.client_sdk.client.UsuarioClient;
+import com.auth.client_sdk.dto.UsuarioAuthDto;
+
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,7 @@ public class UbicacionServiceImpl implements UbicacionService {
     private final ColoniaRepository coloniaRepository;
     private final CiudadRepository ciudadRepository;
     private final UbicacionMapper ubicacionMapper;
+    private final UsuarioClient usuarioClient;
 
     @Override
     @Transactional
@@ -134,4 +142,18 @@ public class UbicacionServiceImpl implements UbicacionService {
 
         ubicacionRepository.deleteById(id);
     }
+
+	@Override
+	public String pruebaUsuario(Long id) {
+        try {
+            UsuarioAuthDto usuario = usuarioClient.obtenerUsuario(id);
+            
+            return "El nombre de este usuario es: "+usuario.nombre()+ " con el correo: "+usuario.email();
+            
+        } catch (Exception e) {
+            log.error("❌ Error de red al intentar obtener el nombre: {}", e.getMessage());
+            return "Usuario Desconocido";
+        }
+
+	}
 }
