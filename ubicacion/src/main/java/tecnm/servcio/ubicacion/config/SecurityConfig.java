@@ -50,7 +50,7 @@ public class SecurityConfig {
             );
             
         // El cadenero de tu librería entra en acción
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+          http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }
