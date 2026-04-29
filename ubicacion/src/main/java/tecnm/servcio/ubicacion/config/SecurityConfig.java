@@ -12,6 +12,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.ayuntamiento.security_lib.jwt.JwtAuthenticationEntryPoint;
 import com.ayuntamiento.security_lib.jwt.JwtAuthenticationFilter;
 
+import feign.Request.HttpMethod;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -36,12 +38,14 @@ public class SecurityConfig {
                 // 🟢 ZONA PÚBLICA (No piden Token JWT)
                 // Agrega aquí todas las rutas que cualquiera puede ver.
                 // =======================================================
-                .requestMatchers(
-                    "/api/auth/login",       // Ejemplo: Ruta para iniciar sesión
-                    "/api/auth/registro",    // Ejemplo: Ruta para registrarse
-                    "/api/ubicaciones/**"        // Ejemplo: Cualquier cosa dentro de "publico"
-                ).permitAll()
-                
+            		.requestMatchers(
+                            org.springframework.http.HttpMethod.OPTIONS, "/**" 
+                        ).permitAll()
+                        .requestMatchers(
+                            "/api/auth/login",       
+                            "/api/auth/registro",    
+                            "/api/ubicaciones/**"        
+                        ).permitAll()
                 // =======================================================
                 // 🔴 ZONA PRIVADA (Exigen Token JWT válido obligatoriamente)
                 // Cualquier ruta que NO esté en la lista de arriba, cae aquí.
