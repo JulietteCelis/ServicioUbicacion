@@ -21,7 +21,7 @@ import tecnm.servcio.ubicacion.Dto.UbicacionRequestDTO;
 import tecnm.servcio.ubicacion.Dto.UbicacionResponseDTO;
 import tecnm.servcio.ubicacion.Service.UbicacionService;
 
-@CrossOrigin(origins = "http://localhost:3002") 
+//@CrossOrigin(origins = "http://localhost:3002") 
 
 @RestController
 @RequestMapping("/api/ubicaciones")

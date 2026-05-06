@@ -41,11 +41,12 @@ public class SecurityConfig {
             		.requestMatchers(
                             org.springframework.http.HttpMethod.OPTIONS, "/**" 
                         ).permitAll()
-                        .requestMatchers(
-                            "/api/auth/login",       
-                            "/api/auth/registro",    
-                            "/api/ubicaciones/**"        
-                        ).permitAll()
+            		.requestMatchers(
+            			    "/api/auth/login",
+            			    "/api/auth/registro",
+            			    "/api/ubicaciones/**",
+            			    "/api/colonias/**"
+            			).permitAll()
                 // =======================================================
                 // 🔴 ZONA PRIVADA (Exigen Token JWT válido obligatoriamente)
                 // Cualquier ruta que NO esté en la lista de arriba, cae aquí.
