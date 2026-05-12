@@ -1,11 +1,13 @@
 package tecnm.servcio.ubicacion.ServiceImpl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.auth.client_sdk.client.UsuarioClient;
 import com.auth.client_sdk.dto.UsuarioAuthDto;
 
 import lombok.RequiredArgsConstructor;
@@ -21,10 +23,6 @@ import tecnm.servcio.ubicacion.Repository.ColoniaRepository;
 import tecnm.servcio.ubicacion.Repository.UbicacionRepository;
 import tecnm.servcio.ubicacion.Service.UbicacionService;
 import tecnm.servcio.ubicacion.mapper.UbicacionMapper;
-
-import com.auth.client_sdk.client.UsuarioClient;
-import com.auth.client_sdk.dto.UsuarioAuthDto;
-
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +40,6 @@ public class UbicacionServiceImpl implements UbicacionService {
     public UbicacionResponseDTO crear(UbicacionRequestDTO dto) {
         log.info("Procesando ubicación en: {}, {}", dto.getColonia(), dto.getCiudad());
 
-        // Esto busca la ciudad por nombre; si no existe, la crea
         Ciudad ciudad = ciudadRepository.findByNombreIgnoreCase(dto.getCiudad())
                 .orElseGet(() -> ciudadRepository.save(
                         Ciudad.builder()
@@ -50,16 +47,17 @@ public class UbicacionServiceImpl implements UbicacionService {
                                 .build()
                 ));
 
-        // Aquí buscamos la colonia asociada a la ciudad; si no existe, la creamos
-        Colonia colonia = coloniaRepository.findByNombreIgnoreCaseAndCiudad(dto.getColonia(), ciudad)
+        String nombreColonia = resolverNombreColonia(dto, ciudad);
+
+        Colonia colonia = coloniaRepository.findByNombreIgnoreCaseAndCiudad(nombreColonia, ciudad)
                 .orElseGet(() -> coloniaRepository.save(
                         Colonia.builder()
-                                .nombre(dto.getColonia())
+                                .nombre(nombreColonia)
+                                .codigoPostal(obtenerCodigoPostalValido(dto.getCodigoPostal()))
                                 .ciudad(ciudad)
                                 .build()
                 ));
 
-        // Este bloque crea la ubicación asociándola a la colonia encontrada
         Ubicacion entity = ubicacionMapper.toEntity(dto, colonia);
 
         return ubicacionMapper.toDTO(ubicacionRepository.save(entity));
@@ -105,7 +103,6 @@ public class UbicacionServiceImpl implements UbicacionService {
         Ubicacion existente = ubicacionRepository.findById(id)
                 .orElseThrow(() -> new UbicacionNotFoundException(id));
 
-        // Aquí validamos o creamos la ciudad
         Ciudad ciudad = ciudadRepository.findByNombreIgnoreCase(dto.getCiudad())
                 .orElseGet(() -> ciudadRepository.save(
                         Ciudad.builder()
@@ -113,16 +110,17 @@ public class UbicacionServiceImpl implements UbicacionService {
                                 .build()
                 ));
 
-        // Aquí validamos o creamos la colonia asociada a esa ciudad
-        Colonia colonia = coloniaRepository.findByNombreIgnoreCaseAndCiudad(dto.getColonia(), ciudad)
+        String nombreColonia = resolverNombreColonia(dto, ciudad);
+
+        Colonia colonia = coloniaRepository.findByNombreIgnoreCaseAndCiudad(nombreColonia, ciudad)
                 .orElseGet(() -> coloniaRepository.save(
                         Colonia.builder()
-                                .nombre(dto.getColonia())
+                                .nombre(nombreColonia)
+                                .codigoPostal(obtenerCodigoPostalValido(dto.getCodigoPostal()))
                                 .ciudad(ciudad)
                                 .build()
                 ));
 
-        // Este bloque reemplaza los datos de la ubicación existente
         existente.setLatitud(dto.getLatitud());
         existente.setLongitud(dto.getLongitud());
         existente.setDireccion(dto.getDireccion());
@@ -143,17 +141,149 @@ public class UbicacionServiceImpl implements UbicacionService {
         ubicacionRepository.deleteById(id);
     }
 
-	@Override
-	public String pruebaUsuario(Long id) {
+    @Override
+    public String pruebaUsuario(Long id) {
         try {
             UsuarioAuthDto usuario = usuarioClient.obtenerUsuario(id);
-            
-            return "El nombre de este usuario es: "+usuario.nombre()+ " con el correo: "+usuario.email();
-            
+
+            return "El nombre de este usuario es: " + usuario.nombre()
+                    + " con el correo: " + usuario.email();
+
         } catch (Exception e) {
             log.error("❌ Error de red al intentar obtener el nombre: {}", e.getMessage());
             return "Usuario Desconocido";
         }
+    }
 
-	}
+    private String resolverNombreColonia(UbicacionRequestDTO dto, Ciudad ciudad) {
+        String coloniaRecibida = limpiarTexto(dto.getColonia());
+        String direccion = limpiarTexto(dto.getDireccion());
+        String codigoPostal = limpiarTexto(dto.getCodigoPostal());
+
+        if (!esColoniaInvalida(coloniaRecibida)) {
+            log.info("Colonia recibida válida desde frontend: {}", coloniaRecibida);
+            return coloniaRecibida;
+        }
+
+        Optional<Colonia> coloniaPorCodigoPostal = buscarColoniaPorCodigoPostal(codigoPostal, direccion, ciudad);
+
+        if (coloniaPorCodigoPostal.isPresent()) {
+            String nombre = coloniaPorCodigoPostal.get().getNombre();
+            log.info("Colonia encontrada por código postal {}: {}", codigoPostal, nombre);
+            return nombre;
+        }
+
+        Optional<Colonia> coloniaPorDireccion = buscarColoniaEnDireccion(direccion, ciudad);
+
+        if (coloniaPorDireccion.isPresent()) {
+            String nombre = coloniaPorDireccion.get().getNombre();
+            log.info("Colonia encontrada en BD por dirección: {}", nombre);
+            return nombre;
+        }
+
+        log.warn("No se pudo determinar colonia para la dirección: {}", dto.getDireccion());
+        return "No determinada";
+    }
+
+    private Optional<Colonia> buscarColoniaPorCodigoPostal(String codigoPostal, String direccion, Ciudad ciudad) {
+        if (codigoPostal == null || codigoPostal.isBlank()
+                || codigoPostal.equalsIgnoreCase("No disponible")) {
+            return Optional.empty();
+        }
+
+        List<Colonia> colonias = coloniaRepository.findByCodigoPostalAndCiudad(codigoPostal, ciudad);
+
+        if (colonias.isEmpty()) {
+            log.warn("No hay colonias registradas con CP {} para la ciudad {}", codigoPostal, ciudad.getNombre());
+            return Optional.empty();
+        }
+
+        if (colonias.size() == 1) {
+            return Optional.of(colonias.get(0));
+        }
+
+        if (direccion != null && !direccion.isBlank()) {
+            Optional<Colonia> coincidenciaPorDireccion = colonias.stream()
+                    .filter(colonia -> direccion.toLowerCase()
+                            .contains(colonia.getNombre().toLowerCase()))
+                    .findFirst();
+
+            if (coincidenciaPorDireccion.isPresent()) {
+                return coincidenciaPorDireccion;
+            }
+        }
+
+        log.warn("Hay varias colonias con CP {}, se usará la primera encontrada: {}", 
+                codigoPostal, colonias.get(0).getNombre());
+
+        return Optional.of(colonias.get(0));
+    }
+
+    private Optional<Colonia> buscarColoniaEnDireccion(String direccion, Ciudad ciudad) {
+        if (direccion == null || direccion.isBlank()) {
+            return Optional.empty();
+        }
+
+        return coloniaRepository.findAll()
+                .stream()
+                .filter(colonia -> colonia.getCiudad() != null)
+                .filter(colonia -> colonia.getCiudad().getId().equals(ciudad.getId()))
+                .filter(colonia -> direccion.toLowerCase().contains(
+                        colonia.getNombre().toLowerCase()
+                ))
+                .findFirst();
+    }
+
+    private boolean esColoniaInvalida(String colonia) {
+        if (colonia == null || colonia.isBlank()) {
+            return true;
+        }
+
+        String valor = colonia.toLowerCase();
+
+        return valor.equals("no disponible")
+                || valor.equals("sin colonia")
+                || valor.equals("no determinada")
+                || valor.startsWith("calle ")
+                || valor.startsWith("avenida ")
+                || valor.startsWith("av. ")
+                || valor.startsWith("boulevard ")
+                || valor.startsWith("blvd ")
+                || valor.startsWith("carretera ")
+                || valor.contains("calle presa")
+                || valor.contains("andador ")
+                || valor.contains("privada ");
+    }
+
+    private String obtenerCodigoPostalValido(String codigoPostal) {
+        String valor = limpiarTexto(codigoPostal);
+
+        if (valor == null || valor.isBlank()
+                || valor.equalsIgnoreCase("No disponible")) {
+            return null;
+        }
+
+        return valor;
+    }
+
+    private String limpiarTexto(String texto) {
+        if (texto == null) {
+            return null;
+        }
+
+        return texto.trim();
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> obtenerColoniasPorCodigoPostal(String codigoPostal) {
+        log.info("Buscando colonias por código postal: {}", codigoPostal);
+
+        return coloniaRepository.findByCodigoPostal(codigoPostal)
+                .stream()
+                .map(Colonia::getNombre)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
 }

@@ -8,9 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class UbicacionRequestDTO {
-	@NotNull(message = "La latitud es obligatoria")
+
+    @NotNull(message = "La latitud es obligatoria")
     private Double latitud;
 
     @NotNull(message = "La longitud es obligatoria")
@@ -19,9 +19,10 @@ public class UbicacionRequestDTO {
     @NotBlank(message = "La dirección es obligatoria")
     private String direccion;
 
-    @NotBlank(message = "La colonia es obligatoria")
     private String colonia;
 
     @NotBlank(message = "La ciudad es obligatoria")
     private String ciudad;
+
+    private String codigoPostal;
 }

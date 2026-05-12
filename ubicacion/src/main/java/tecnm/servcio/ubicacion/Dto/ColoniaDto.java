@@ -13,5 +13,6 @@ public class ColoniaDto {
 
     private Long id;
     private String nombre;
+    private String codigoPostal;
     private CiudadDto ciudad;
 }

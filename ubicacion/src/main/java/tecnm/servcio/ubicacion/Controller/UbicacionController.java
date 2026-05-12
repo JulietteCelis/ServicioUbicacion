@@ -21,7 +21,7 @@ import tecnm.servcio.ubicacion.Dto.UbicacionRequestDTO;
 import tecnm.servcio.ubicacion.Dto.UbicacionResponseDTO;
 import tecnm.servcio.ubicacion.Service.UbicacionService;
 
-//@CrossOrigin(origins = "http://localhost:3002") 
+@CrossOrigin(origins = "http://localhost:3002") 
 
 @RestController
 @RequestMapping("/api/ubicaciones")
@@ -66,5 +66,10 @@ public class UbicacionController {
     @GetMapping("/usuario/{id}")
     public ResponseEntity<String> probarusuario(@PathVariable Long id) {
         return ResponseEntity.ok(ubicacionService.pruebaUsuario(id));
+    }
+    
+    @GetMapping("/colonias/codigo-postal/{codigoPostal}")
+    public ResponseEntity<List<String>> obtenerColoniasPorCodigoPostal(@PathVariable String codigoPostal) {
+        return ResponseEntity.ok(ubicacionService.obtenerColoniasPorCodigoPostal(codigoPostal));
     }
 }

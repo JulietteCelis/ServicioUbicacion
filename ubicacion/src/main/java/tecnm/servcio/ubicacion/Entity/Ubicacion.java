@@ -1,5 +1,6 @@
 package tecnm.servcio.ubicacion.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -31,4 +32,7 @@ public class Ubicacion {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "colonia_id")
     private Colonia colonia;
+    
+    @Column(name = "codigo_postal", length = 10)
+    private String codigoPostal;
 }

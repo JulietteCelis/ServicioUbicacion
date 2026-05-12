@@ -6,8 +6,8 @@ import tecnm.servcio.ubicacion.Dto.UbicacionRequestDTO;
 import tecnm.servcio.ubicacion.Dto.UbicacionResponseDTO;
 
 public interface UbicacionService {
-	
-	UbicacionResponseDTO crear(UbicacionRequestDTO dto);
+
+    UbicacionResponseDTO crear(UbicacionRequestDTO dto);
 
     UbicacionResponseDTO obtenerPorId(Long id);
 
@@ -18,7 +18,8 @@ public interface UbicacionService {
     UbicacionResponseDTO actualizar(Long id, UbicacionRequestDTO dto);
 
     void eliminar(Long id);
-    
+
     String pruebaUsuario(Long id);
 
+    List<String> obtenerColoniasPorCodigoPostal(String codigoPostal);
 }
